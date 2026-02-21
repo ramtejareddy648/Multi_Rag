@@ -41,22 +41,37 @@ load_dotenv()
 
 DB_URI = os.getenv("POSTGRES_URL")
 
+# @st.cache_resource
+# def get_connection_pool():
+#     db_url = os.getenv("POSTGRES_URL")
+#     return ConnectionPool(
+#         conninfo=db_url,
+#         max_size=10,  
+#         min_size=1,   
+#         kwargs={
+#             "autocommit": True,
+#             "prepare_threshold": 0,
+#             "sslmode": "require"
+#         },
+#     )
 @st.cache_resource
 def get_connection_pool():
-    db_url = os.getenv("POSTGRES_URL")
+    # Streamlit Cloud will pull this from your "Secrets" TOML
+    db_url = os.environ.get("POSTGRES_URL") 
     return ConnectionPool(
         conninfo=db_url,
-        max_size=10,  
-        min_size=1,   
+        max_size=10,    # Neon Free Tier limit
+        min_size=1,     # Keep at least one connection open
+        timeout=30.0,   # Wait 30 seconds before giving up
         kwargs={
             "autocommit": True,
-            "prepare_threshold": 0,
             "sslmode": "require"
         },
     )
 
 pool = get_connection_pool()
 check_point = PostgresSaver(pool)
+
 
 
 def initialize_db():
