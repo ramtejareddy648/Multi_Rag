@@ -1,0 +1,23 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+myvenv/
+
+# Uploads
+uploads_doc/
+
+# DB
+chatbot.db
+
+# OS
+.DS_Store
+Thumbs.db
+
