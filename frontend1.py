@@ -1,5 +1,5 @@
 import streamlit as st
-from backend2 import workflow,reterive_all_threads,delete_thread,MultiRag
+from backend1 import workflow,reterive_all_threads,delete_thread,MultiRag
 import uuid
 from langchain_core.messages import HumanMessage,AIMessage
 
@@ -71,25 +71,6 @@ def text_to_speech(text):
 
 
 
-
-with st.sidebar:
-    st.title('user session')
-    
-    user_name=st.text_input("Enter your Username to see your chats",value='Reddy')
-    
-    if st.button('Set Username'):
-        if user_name:
-            
-            st.session_state['user_id'] = user_name.lower().strip()
-            st.rerun()
-    
-    if 'user_id' not in st.session_state:
-        st.warning("Please enter a username and click 'Set Username' to continue.")
-        st.stop()
-    
-    else:
-        st.success(f"Logged in as: **{st.session_state['user_id']}**")
-    
     
 
 
@@ -157,19 +138,12 @@ st.sidebar.header('My Conversations')
 if 'messages_history' not in st.session_state:
     st.session_state['messages_history']=[]
 
-
-if 'user_id' not in st.session_state:
-    st.session_state['user_id'] = "guest_user"
-
-
 if 'thread_id' not in st.session_state:
     st.session_state['thread_id']=generate_thread_id()
 
 
-if 'user_id' in st.session_state:
-    if 'All_chat_threada' not in st.session_state or st.session_state.get('last_user') != st.session_state['user_id']:
-        st.session_state['All_chat_threada'] = reterive_all_threads(st.session_state['user_id'])
-        st.session_state['last_user'] = st.session_state['user_id']
+if 'All_chat_threada' not in st.session_state:
+    st.session_state['All_chat_threada']=reterive_all_threads()
 
 
 add_thread_id(st.session_state['thread_id'])
@@ -235,7 +209,7 @@ for thread_id in st.session_state['All_chat_threada'][::-1]:
         if delete_thread(thread_id):
             st.toast(f"Deleted chat {str(thread_id)[:8]}")
             
-            st.session_state['All_chat_threada'] = reterive_all_threads(st.session_state['user_id'])
+            st.session_state['All_chat_threada'] = reterive_all_threads()
             if st.session_state.get('thread_id') == thread_id:
                 st.session_state['thread_id'] = generate_thread_id()
                 st.session_state['messages_history'] = []
@@ -263,16 +237,12 @@ if user_input:
         st.markdown(user_input)
     
     CONFIG = {
-        "configurable": {"thread_id": st.session_state["thread_id"],
-                         "user_id": st.session_state["user_id"]},
+        "configurable": {"thread_id": st.session_state["thread_id"]},
         "metadata": {
-            "thread_id": st.session_state["thread_id"],
-            "user_id": st.session_state["user_id"]
+            "thread_id": st.session_state["thread_id"]
         },
         "run_name": "chat_turn",
     }
-    
-    
     
     initial_input = {
         "question": user_input,
