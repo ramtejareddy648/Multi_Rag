@@ -13,93 +13,6 @@ load_dotenv()
 
 SARVAM_API_KEY=os.getenv('SARVAM_API_KEY')
 
-BACKEND_URL = "https://cag-auth.onrender.com"
-
-
-if 'user_id' not in st.session_state:
-    st.title('Welcome to the Chat Application!')
-    tab1, tab2 = st.tabs(["Login", "Register"])
-    
-    
-    with tab1:
-        u=st.text_input("Username")
-        p=st.text_input("Password",type='password')
-        
-        if st.button("Login"):
-            res=requests.post(f"{BACKEND_URL}/login",json={'username':u,'password':p})
-            
-            if res.status_code==200:
-                data=res.json()
-                st.session_state.update({"user_id": data['username'], "role": data['role']})
-                st.success("Login successful!")
-                st.rerun()
-    
-    with tab2:
-        u=st.text_input("Username",key='reg_user')
-        e=st.text_input("Email",key='reg_email')
-        p=st.text_input("Password",type='password',key='reg_pass')
-        r=st.selectbox("Role",['student','faculty'],key='reg_role')
-        
-        if st.button("Register"):
-            res=requests.post(f"{BACKEND_URL}/register",json={'username':u,'email':e,'password':p,'role':r})
-            
-            if res.status_code==200:
-                st.success("Registration successful! Please login.")
-        st.stop()
-
-
-with st.sidebar:
-    st.write(f"Logged in as: **{st.session_state.user_id}** ({st.session_state.role})")
-    if st.button("Logout"):
-        st.session_state.clear()
-        st.success("Logged out successfully!")
-        st.rerun()
-    
-    if st.session_state.role=='faculty':
-        st.header('Faculty :upload Docs')
-        
-        files=st.file_uploader("Upload files to share with students",type=['pdf','txt','png','jpg','jpeg'],accept_multiple_files=True)
-        if st.sidebar.button('Process your files'):
-    
-            if files:
-                image_paths=[]
-                file_paths=[]
-                
-                
-                if not os.path.exists('uploads_doc'):
-                    os.makedirs('uploads_doc')
-        
-        
-                with st.spinner('processing files this may take some time'):
-                    for uploaded_file in files:
-                        file_path=os.path.join('uploads_doc',uploaded_file.name)
-                        with open(file_path,'wb') as f:
-                            f.write(uploaded_file.getbuffer())
-                
-                
-                        if uploaded_file.name.lower().endswith(('pdf','txt')):
-                            file_paths.append(file_path)
-                        else:
-                            image_paths.append(file_path)
-                rag_ingestor=MultiRag()
-                rag_ingestor.build_enhanced_vector_database(
-                image_paths,file_paths
-                )
-                st.sidebar.success(f"Successfully indexed {len(files)} files!")
-            else:
-                st.sidebar.warning("Please upload files first.")
-    else:
-        st.header('Student Dashboard')
-        st.write("Welcome to the student dashboard! Here you can view your conversations and interact with the chatbot. Use the sidebar to manage your chats")
-    
-            
-        
-                
-                
-                
-            
-            
-
 def speech_to_text(audio_bytes):
     """send audio to sarvam ai and get text"""
     url = "https://api.sarvam.ai/speech-to-text"
@@ -159,23 +72,23 @@ def text_to_speech(text):
 
 
 
-# with st.sidebar:
-#     st.title('user session')
+with st.sidebar:
+    st.title('user session')
     
-#     user_name=st.text_input("Enter your Username to see your chats",value='Reddy')
+    user_name=st.text_input("Enter your Username to see your chats",value='Reddy')
     
-#     if st.button('Set Username'):
-#         if user_name:
+    if st.button('Set Username'):
+        if user_name:
             
-#             st.session_state['user_id'] = user_name.lower().strip()
-#             st.rerun()
+            st.session_state['user_id'] = user_name.lower().strip()
+            st.rerun()
     
-#     if 'user_id' not in st.session_state:
-#         st.warning("Please enter a username and click 'Set Username' to continue.")
-#         st.stop()
+    if 'user_id' not in st.session_state:
+        st.warning("Please enter a username and click 'Set Username' to continue.")
+        st.stop()
     
-#     else:
-#         st.success(f"Logged in as: **{st.session_state['user_id']}**")
+    else:
+        st.success(f"Logged in as: **{st.session_state['user_id']}**")
     
     
 
@@ -268,35 +181,35 @@ uploaded_files=st.sidebar.file_uploader(
 )
 
 
-# if st.sidebar.button('Process your files'):
+if st.sidebar.button('Process your files'):
     
-#     if uploaded_files:
-#         image_paths=[]
-#         file_paths=[]
+    if uploaded_files:
+        image_paths=[]
+        file_paths=[]
         
         
-#         if not os.path.exists('uploads_doc'):
-#             os.makedirs('uploads_doc')
+        if not os.path.exists('uploads_doc'):
+            os.makedirs('uploads_doc')
         
         
-#         with st.spinner('processing files this may take some time'):
-#             for uploaded_file in uploaded_files:
-#                 file_path=os.path.join('uploads_doc',uploaded_file.name)
-#                 with open(file_path,'wb') as f:
-#                     f.write(uploaded_file.getbuffer())
+        with st.spinner('processing files this may take some time'):
+            for uploaded_file in uploaded_files:
+                file_path=os.path.join('uploads_doc',uploaded_file.name)
+                with open(file_path,'wb') as f:
+                    f.write(uploaded_file.getbuffer())
                 
                 
-#                 if uploaded_file.name.lower().endswith(('pdf','txt')):
-#                     file_paths.append(file_path)
-#                 else:
-#                     image_paths.append(file_path)
-#         rag_ingestor=MultiRag()
-#         rag_ingestor.build_enhanced_vector_database(
-#             image_paths,file_paths
-#         )
-#         st.sidebar.success(f"Successfully indexed {len(uploaded_files)} files!")
-#     else:
-#         st.sidebar.warning("Please upload files first.")
+                if uploaded_file.name.lower().endswith(('pdf','txt')):
+                    file_paths.append(file_path)
+                else:
+                    image_paths.append(file_path)
+        rag_ingestor=MultiRag()
+        rag_ingestor.build_enhanced_vector_database(
+            image_paths,file_paths
+        )
+        st.sidebar.success(f"Successfully indexed {len(uploaded_files)} files!")
+    else:
+        st.sidebar.warning("Please upload files first.")
         
 
 for thread_id in st.session_state['All_chat_threada'][::-1]:

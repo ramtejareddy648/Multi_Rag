@@ -28,5 +28,21 @@ python-dotenv
 
 langgraph-checkpoint-postgres
 psycopg[binary,pool]
+psycopg2-binary
 pydantic
 ddgs
+
+
+
+fastapi
+uvicorn
+passlib[bcrypt]
+python-multipart
+requests
+python-jose[cryptography]
+psycopg2-binary
+passlib[bcrypt]
+bcrypt==4.0.1
+pymongo[srv]
+certifi
+
