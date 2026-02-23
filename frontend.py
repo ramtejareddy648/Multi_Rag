@@ -45,6 +45,8 @@ if 'user_id' not in st.session_state:
             
             if res.status_code==200:
                 st.success("Registration successful! Please login.")
+            else:
+                st.error(f"Registration failed: {res.text}")
         st.stop()
 
 
