@@ -1,4 +1,13 @@
 import streamlit as st
+import os
+if "LANGSMITH_API_KEY" in st.secrets:
+    os.environ["LANGCHAIN_TRACING_V2"] = "true"
+    os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+    os.environ["LANGCHAIN_API_KEY"] = st.secrets["LANGSMITH_API_KEY"]
+    os.environ["LANGCHAIN_PROJECT"] = st.secrets.get("LANGSMITH_PROJECT", "CAG-RAG-Project")
+    os.environ["LANGSMITH_WORKSPACE_ID"] = st.secrets["LANGSMITH_WORKSPACE_ID"]
+    
+
 from backend2 import workflow,reterive_all_threads,delete_thread,MultiRag
 import uuid
 from langchain_core.messages import HumanMessage,AIMessage
@@ -6,7 +15,7 @@ from langchain_core.messages import HumanMessage,AIMessage
 from streamlit_mic_recorder import mic_recorder
 import requests
 import base64
-import os
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -101,16 +110,11 @@ with st.sidebar:
 
 
 
-if "LANGSMITH_API_KEY" in st.secrets:
-    os.environ["LANGCHAIN_TRACING_V2"] = "true"
-    os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
-    os.environ["LANGCHAIN_API_KEY"] = st.secrets["LANGSMITH_API_KEY"]
-    os.environ["LANGCHAIN_PROJECT"] = st.secrets.get("LANGSMITH_PROJECT", "CAG-RAG-Project")
-    
-    
-    if "LANGSMITH_WORKSPACE_ID" in st.secrets:
-        os.environ["LANGSMITH_WORKSPACE_ID"] = st.secrets["LANGSMITH_WORKSPACE_ID"]          
-                
+
+
+
+
+
             
             
 
