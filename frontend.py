@@ -1,5 +1,27 @@
 import streamlit as st
 import os
+from dotenv import load_dotenv
+
+
+
+def setup_env():
+    
+    load_dotenv()
+    
+   
+    keys_to_map = [
+        "LANGCHAIN_TRACING_V2", 
+        "LANGCHAIN_API_KEY", 
+        "LANGCHAIN_PROJECT", 
+        "LANGSMITH_WORKSPACE_ID"
+    ]
+    
+    for key in keys_to_map:
+        if key in st.secrets:
+            os.environ[key] = str(st.secrets[key])
+
+
+setup_env()
 
 
 from backend2 import workflow,reterive_all_threads,delete_thread,MultiRag
@@ -10,8 +32,6 @@ from streamlit_mic_recorder import mic_recorder
 import requests
 import base64
 
-from dotenv import load_dotenv
-load_dotenv()
 
 
 SARVAM_API_KEY=os.getenv('SARVAM_API_KEY')

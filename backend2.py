@@ -32,8 +32,10 @@ from langchain_astradb import AstraDBVectorStore, AstraDBByteStore
 from psycopg_pool import ConnectionPool
 from langgraph.checkpoint.postgres import PostgresSaver
 import streamlit as st
-load_dotenv()
+# load_dotenv()
 
+if "STREAMLIT_RUNTIME" not in os.environ:
+    load_dotenv()
 
 
 
