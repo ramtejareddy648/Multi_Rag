@@ -1,12 +1,6 @@
 import streamlit as st
 import os
-if "LANGSMITH_API_KEY" in st.secrets:
-    os.environ["LANGCHAIN_TRACING_V2"] = "true"
-    os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
-    os.environ["LANGCHAIN_API_KEY"] = st.secrets["LANGSMITH_API_KEY"]
-    os.environ["LANGCHAIN_PROJECT"] = st.secrets.get("LANGSMITH_PROJECT", "CAG-RAG-Project")
-    os.environ["LANGSMITH_WORKSPACE_ID"] = st.secrets["LANGSMITH_WORKSPACE_ID"]
-    
+
 
 from backend2 import workflow,reterive_all_threads,delete_thread,MultiRag
 import uuid
