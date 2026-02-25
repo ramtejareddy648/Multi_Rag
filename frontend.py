@@ -21,7 +21,8 @@ def setup_env():
             os.environ[key] = str(st.secrets[key])
 
 
-setup_env()
+# setup_env()
+
 
 
 from backend2 import workflow,reterive_all_threads,delete_thread,MultiRag
@@ -31,6 +32,8 @@ from langchain_core.messages import HumanMessage,AIMessage
 from streamlit_mic_recorder import mic_recorder
 import requests
 import base64
+load_dotenv()
+
 
 
 
@@ -116,21 +119,7 @@ with st.sidebar:
     else:
         st.header('Student Dashboard')
         st.write("Welcome to the student dashboard! Here you can view your conversations and interact with the chatbot. Use the sidebar to manage your chats")
-    
-            
-        
-                
-
-
-
-
-
-
-
-
-
-            
-            
+         
 
 def speech_to_text(audio_bytes):
     """send audio to sarvam ai and get text"""

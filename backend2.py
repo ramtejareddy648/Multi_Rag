@@ -34,8 +34,8 @@ from langgraph.checkpoint.postgres import PostgresSaver
 import streamlit as st
 # load_dotenv()
 
-if "STREAMLIT_RUNTIME" not in os.environ:
-    load_dotenv()
+# if "STREAMLIT_RUNTIME" not in os.environ:
+load_dotenv()
 
 
 
@@ -514,7 +514,7 @@ class MultiRag:
         processed_images = []
         
         if file_paths:
-            paesed_ele=self.parse_documents(file_paths)
+            parsed_ele=self.parse_documents(file_paths)
         
         
         if image_paths:
@@ -527,7 +527,7 @@ class MultiRag:
         
         
         pdf_extracted_image=[]
-        for img_data in paesed_ele['images']:
+        for img_data in parsed_ele['images']:
             try:
                 
                 description=self._generate_enhanced_image_description(img_data['content'])
@@ -546,11 +546,11 @@ class MultiRag:
         
         all_elements=[]
         
-        for text_data in paesed_ele['texts']:
+        for text_data in parsed_ele['texts']:
             all_elements.append(text_data)
         
         
-        for table_data in paesed_ele['tables']:
+        for table_data in parsed_ele['tables']:
             all_elements.append(table_data)
         
         
@@ -628,8 +628,8 @@ class MultiRag:
         
        
         print(f"Enhanced vector database built with {len(all_elements)} NEW elements")
-        print(f"- Text elements: {len(paesed_ele['texts'])}")
-        print(f"- Table elements: {len(paesed_ele['tables'])}")
+        print(f"- Text elements: {len(parsed_ele['texts'])}")
+        print(f"- Table elements: {len(parsed_ele['tables'])}")
         print(f"- Image elements: {len(processed_images) + len(pdf_extracted_image)}")
         print("Sync to AstraDB Cloud successful.")
         
