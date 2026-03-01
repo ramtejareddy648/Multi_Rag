@@ -43,7 +43,7 @@ load_dotenv()
 DB_URI = os.getenv("POSTGRES_URL")
 
 
-@st.cache_resource
+
 def get_connection_pool():
     
     db_url = os.environ.get("POSTGRES_URL") 
@@ -58,22 +58,23 @@ def get_connection_pool():
         },
     )
 
-pool = get_connection_pool()
-check_point = PostgresSaver(pool)
 
 
 
-def initialize_db():
-    try:
+# def initialize_db():
+#     try:
         
-        check_point.setup() 
-        print("--- NEON CLOUD TABLES INITIALIZED ---")
-    except Exception as e:
+#         check_point.setup() 
+#         print("--- NEON CLOUD TABLES INITIALIZED ---")
+#     except Exception as e:
         
-        print(f"Database Init Info: {e}")
+#         print(f"Database Init Info: {e}")
 
 
-initialize_db()
+
+
+
+
 
 try:
     import fitz
@@ -916,36 +917,48 @@ def workflow_fun():
     graph.add_edge('rewrite_query','web_search')
     graph.add_edge('web_search','refine')
     
-        
-    flow=graph.compile(checkpointer=check_point)
-    
+    pool = get_connection_pool()
+    check_point = PostgresSaver(pool)
+    check_point.setup()
+
+    flow = graph.compile(checkpointer=check_point)
+
+    # attach checkpoint so we can access later
+    flow._checkpointer = check_point
+    flow._pool = pool
+    flow._rag = rag 
+
     return flow
+    
 
 
-workflow=workflow_fun()
+
 
 
 SARVAM_API_KEY=os.getenv('SARVAM_API_KEY')
 
 
-def reterive_all_threads(user_id:str):
+def reterive_all_threads(workflow,user_id:str):
     all_threads = set()
     try:
        
-        for checkpoint in check_point.list(None,filter={"user_id": user_id}):
+       
+        check_point = workflow._checkpointer
+
+        for checkpoint in check_point.list(None, filter={"user_id": user_id}):
             t_id = checkpoint.config['configurable'].get('thread_id')
             if t_id:
                 all_threads.add(t_id)
     except Exception as e:
         print(f"Sidebar loading info: {e}")
-        st.error(f"Error loading chat history: {e}")
+        
     return list(all_threads)
 
  
-def delete_thread(thread_id: str):
+def delete_thread(workflow,thread_id: str):
     """Delete thread data from the cloud Postgres database.""" 
     try:
-        
+        pool = workflow._pool
         target_id = str(thread_id)
         
         

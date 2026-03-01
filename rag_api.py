@@ -7,19 +7,18 @@ from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 import os
-from backend2 import MultiRag
+# from backend2 import MultiRag
 from dotenv import load_dotenv
 load_dotenv()
 
-from backend2 import (
-    workflow,
-    reterive_all_threads,
-    delete_thread
-)
+from backend2 import workflow_fun, reterive_all_threads, delete_thread
 
 from langchain_core.messages import HumanMessage
 
 app = FastAPI()
+
+
+workflow_instance = None
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,6 +27,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+async def startup_event():
+    global workflow_instance
+    try:
+        print("Initializing workflow...")
+        workflow_instance = workflow_fun()
+        print("Workflow ready ✅")
+    except Exception as e:
+        print(f"Startup failed ❌: {e}")
+        workflow_instance = None
+        
+        
+        
+def get_workflow():
+    return workflow_instance
+
 
 
 @app.options("/{rest_of_path:path}")
@@ -61,6 +78,12 @@ async def chat(req: ChatRequest):
     }
 
     async def event_generator():
+        
+        workflow = get_workflow()
+
+        if workflow is None:
+            yield f"data: {json.dumps({'error': 'Workflow not initialized'})}\n\n"
+            return
 
         for update in workflow.stream(
             initial_input,
@@ -92,14 +115,23 @@ async def chat(req: ChatRequest):
 
 @app.get("/threads")
 def get_threads(user_id: str):
-    return reterive_all_threads(user_id)
+    
+    workflow = get_workflow()
+    if workflow is None:
+        return {"error": "Workflow not initialized"}
+    return reterive_all_threads(workflow, user_id)
+    # return reterive_all_threads(user_id)
 
 
 
 
 @app.delete("/threads/{thread_id}")
 def remove_thread(thread_id: str):
-    ok = delete_thread(thread_id)
+    
+    workflow = get_workflow()
+    if workflow is None:
+        return {"error": "Workflow not initialized"}
+    ok = delete_thread(workflow, thread_id)
     return {"success": ok}
 
 
@@ -107,6 +139,14 @@ def remove_thread(thread_id: str):
 
 @app.get("/threads/{thread_id}/messages")
 def load_messages(thread_id: str):
+    
+    
+    workflow = get_workflow()
+    
+    if workflow is None:
+        return {"error": "Workflow not initialized"}
+
+    
 
     state = workflow.get_state(
         config={"configurable": {"thread_id": thread_id}}
@@ -144,7 +184,11 @@ async def upload(files: list[UploadFile] = File(...)):
             buffer.write(await f.read())
         paths.append(path)
 
-    rag = MultiRag()
+    workflow = get_workflow()
+    
+    if workflow is None:
+        return {"error": "Workflow not initialized"}
+    rag = workflow._rag
 
     rag.build_enhanced_vector_database(
         file_paths=paths
@@ -244,4 +288,7 @@ async def text_to_speech_api(payload: dict):
     
 @app.get("/")
 def health():
-    return {"status": "ok"}
+    if workflow_instance is None:
+        return {"status": "error", "workflow": "not_ready"}
+    return {"status": "ok", "workflow": "ready"}
+
