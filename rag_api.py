@@ -6,6 +6,10 @@ from fastapi import Request
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 import requests
+import os
+from backend2 import MultiRag
+from dotenv import load_dotenv
+load_dotenv()
 
 from backend2 import (
     workflow,
@@ -125,8 +129,7 @@ def load_messages(thread_id: str):
 
 
 
-from backend2 import MultiRag
-import os
+
 
 @app.post("/upload")
 async def upload(files: list[UploadFile] = File(...)):
@@ -237,3 +240,8 @@ async def text_to_speech_api(payload: dict):
     }
     
     
+    
+    
+@app.get("/")
+def health():
+    return {"status": "ok"}
