@@ -2,6 +2,8 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import json
+from fastapi import Request
+from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend2 import (
@@ -21,6 +23,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(rest_of_path: str, request: Request):
+    return Response(status_code=200)
 
 class ChatRequest(BaseModel):
     question: str
