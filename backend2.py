@@ -169,7 +169,7 @@ class MultiRag:
             chunk_overlap=300, 
         )
         
-        self.llm=ChatGroq(model='llama-3.3-70b-versatile')
+        self.llm=ChatGroq(model='llama-3.1-8b-instant')
         
         
         self.vision_model=ChatOpenAI(model='gpt-4o-mini')
@@ -657,7 +657,7 @@ class MultiRag:
         question=state['question']
         docs=self.retriever.get_relevant_documents(question)
         print(f"--- RETRIEVED {len(docs)} DOCUMENTS ---")
-        return{**state,
+        return{
                'docs':docs} 
     
     
@@ -692,6 +692,7 @@ class MultiRag:
         docs=state.get('docs',[])
         if not docs:
             return {
+               
                 "verdict": "INCORRECT",
                 "reason": "No documents were found by the retriever.",
                 "good_docs": []
@@ -711,12 +712,12 @@ class MultiRag:
                 good.append(doc)
         
         if any(s > UPPER_TH for s in scores):
-            return {**state,'good_docs': good, 'verdict': "CORRECT", 'reason': "High relevance found."}
+            return {'good_docs': good, 'verdict': "CORRECT", 'reason': "High relevance found."}
     
         if all(s < LOWER_TH for s in scores):
-            return {**state,'good_docs': [], 'verdict': 'INCORRECT', 'reason': "All chunks irrelevant."}
+            return {'good_docs': [], 'verdict': 'INCORRECT', 'reason': "All chunks irrelevant."}
     
-        return {**state,'good_docs': good, 'verdict': 'AMBIGUOUS', 'reason': "Partial relevance found."}
+        return {'good_docs': good, 'verdict': 'AMBIGUOUS', 'reason': "Partial relevance found."}
     
     
     def decomepose_sentences(self,text:str)->List[str]:
@@ -772,10 +773,10 @@ class MultiRag:
                     kept_docs.append(new_doc)
 
         return {
-            **state,
+           
             'strips': all_strips,
             'keep_strips': kept_sentences,
-            'refined_context_docs': kept_docs 
+            'refined_context_docs': kept_docs if kept_docs else use_docs 
         }
         
     
@@ -831,8 +832,46 @@ class MultiRag:
             ))
     
         print(f"--- WEB SEARCH COMPLETED: {len(web_docs)} RESULTS ---")
-        return {**state,
+        return {
                 'web_docs': web_docs}
+        
+        
+#     def generate(self, state: State) -> State:
+
+#         question = state["question"]
+#         relevant_docs = state.get("refined_context_docs", [])
+
+#         context = "\n\n".join(
+#         f"Source: {doc.metadata.get('source','unknown')}\n{doc.page_content}"
+#         for doc in relevant_docs
+#     )
+
+#         prompt = f"""
+# You are a helpful assistant.
+
+# Use ONLY the provided context to answer.
+
+# If context is empty, say you don't have enough information.
+
+# CONTEXT:
+# {context if context else "No context available"}
+
+# QUESTION:
+# {question}
+# """
+
+#         response = self.llm.invoke(prompt)
+
+#         return {
+        
+#         "answer": response.content,
+#         "messages": state.get("messages", []) + [
+#             AIMessage(content=response.content)
+#         ]
+#     }
+        
+        
+        
     def generate(self,state: State) -> State:
         """
         Refined generate function that handles multimodal context sorting 
