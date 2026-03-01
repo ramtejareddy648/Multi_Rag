@@ -292,3 +292,10 @@ def health():
         return {"status": "error", "workflow": "not_ready"}
     return {"status": "ok", "workflow": "ready"}
 
+
+
+
+@app.get("/favicon.ico")
+def favicon():
+    return Response(status_code=204)
+
