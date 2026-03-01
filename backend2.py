@@ -1,5 +1,6 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
+import requests
 from langchain_community.document_loaders import PyPDFLoader,TextLoader
 from langchain_openai import ChatOpenAI,OpenAIEmbeddings
 from langchain_groq import ChatGroq
@@ -31,7 +32,7 @@ from langgraph.graph.message import add_messages
 from langchain_astradb import AstraDBVectorStore, AstraDBByteStore
 from psycopg_pool import ConnectionPool
 from langgraph.checkpoint.postgres import PostgresSaver
-import streamlit as st
+
 # load_dotenv()
 
 # if "STREAMLIT_RUNTIME" not in os.environ:
@@ -924,7 +925,7 @@ def workflow_fun():
 workflow=workflow_fun()
 
 
-
+SARVAM_API_KEY=os.getenv('SARVAM_API_KEY')
 
 
 def reterive_all_threads(user_id:str):
@@ -969,6 +970,62 @@ def delete_thread(thread_id: str):
 
 
 
+def speech_to_text(audio_bytes):
+    """send audio to sarvam ai and get text"""
+    url = "https://api.sarvam.ai/speech-to-text"
+    
+    files={
+        'file':('audio.wav',audio_bytes,'audio/wav')
+        
+    }
+    headers={
+        'api-subscription-key':SARVAM_API_KEY
+    }
+    
+    data = {
+        'model': 'saaras:v3', 
+        'mode': 'translate', 
+        'language_code': 'te-IN'
+    }
+
+    try:
+        response=requests.post(url,headers=headers,files=files,data=data)
+        
+        if response.status_code==200:
+            return response.json().get('transcript','')
+        else:
+           
+            return None
+    except Exception as e:
+        
+        return None
+
+def text_to_speech(text):
+    """convert text to speech"""
+    url="https://api.sarvam.ai/text-to-speech"
+    
+    headers={
+        'api-subscription-key':SARVAM_API_KEY,
+        "Content-Type":'application/json'
+    }
+    
+    payload = {
+        'text': text,                    
+        'model': 'bulbul:v3',
+        'speaker': 'shubh',             
+        'target_language_code': 'en-IN'
+    }
+    
+    try:
+        response=requests.post(url,headers=headers,json=payload)
+        if response.status_code==200:
+            return response.json()
+        else:
+           
+            return None
+    except Exception as e:
+    
+        return None
 
 
     

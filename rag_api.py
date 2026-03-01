@@ -5,6 +5,7 @@ import json
 from fastapi import Request
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
+import requests
 
 from backend2 import (
     workflow,
@@ -149,3 +150,90 @@ async def upload(files: list[UploadFile] = File(...)):
     return {"success": True, "message": "Files indexed"}
 
 
+
+
+@app.post("/speech-to-text")
+async def speech_to_text_api(file: UploadFile = File(...)):
+
+    SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
+
+    if not SARVAM_API_KEY:
+        return {"error": "SARVAM_API_KEY not set"}
+
+    audio_bytes = await file.read()
+
+    url = "https://api.sarvam.ai/speech-to-text"
+
+    files = {
+        "file": ("audio.wav", audio_bytes, "audio/wav")
+    }
+
+    headers = {
+        "api-subscription-key": SARVAM_API_KEY
+    }
+
+    data = {
+        "model": "saaras:v3",
+        "mode": "translate",
+        "language_code": "te-IN"
+    }
+
+    response = requests.post(
+        url,
+        headers=headers,
+        files=files,
+        data=data
+    )
+
+    if response.status_code != 200:
+        return {"error": response.text}
+
+    return {
+        "transcript": response.json().get("transcript", "")
+    }
+    
+    
+    
+    
+    
+    
+@app.post("/text-to-speech")
+async def text_to_speech_api(payload: dict):
+
+    SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
+
+    if not SARVAM_API_KEY:
+        return {"error": "SARVAM_API_KEY not set"}
+
+    text = payload.get("text", "")
+
+    url = "https://api.sarvam.ai/text-to-speech"
+
+    headers = {
+        "api-subscription-key": SARVAM_API_KEY,
+        "Content-Type": "application/json"
+    }
+
+    body = {
+        "text": text[:500],
+        "model": "bulbul:v3",
+        "speaker": "shubh",
+        "target_language_code": "en-IN"
+    }
+
+    response = requests.post(
+        url,
+        headers=headers,
+        json=body
+    )
+
+    if response.status_code != 200:
+        return {"error": response.text}
+
+    audio_base64 = response.json()["audios"][0]
+
+    return {
+        "audio": audio_base64
+    }
+    
+    
