@@ -58,7 +58,7 @@ class ChatRequest(BaseModel):
     
 
 
-@app.post("/chat")
+@app.post("/chat",response_class=StreamingResponse)
 async def chat(req: ChatRequest):
 
     CONFIG = {
