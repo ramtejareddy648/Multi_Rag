@@ -179,7 +179,7 @@ class MultiRag:
         self.retriever = CustomMultiVectorRetriever(
         vectorstore=self.vectors,
         parent_store=self.parent_store,
-        k=6
+        k=2
         )
         
     
