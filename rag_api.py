@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import json
+from fastapi.middleware.cors import CORSMiddleware
 
 from backend2 import (
     workflow,
@@ -12,6 +13,14 @@ from backend2 import (
 from langchain_core.messages import HumanMessage
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # allow all for now
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class ChatRequest(BaseModel):
     question: str
