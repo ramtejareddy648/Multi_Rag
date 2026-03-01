@@ -966,3 +966,9 @@ def delete_thread(thread_id: str):
         print(f"Error while deleting thread from Postgres: {e}")
         return False
  
+
+
+
+
+
+    
