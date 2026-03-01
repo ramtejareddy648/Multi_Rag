@@ -657,7 +657,8 @@ class MultiRag:
         question=state['question']
         docs=self.retriever.get_relevant_documents(question)
         print(f"--- RETRIEVED {len(docs)} DOCUMENTS ---")
-        return{'docs':docs} 
+        return{**state,
+               'docs':docs} 
     
     
     
@@ -710,12 +711,12 @@ class MultiRag:
                 good.append(doc)
         
         if any(s > UPPER_TH for s in scores):
-            return {'good_docs': good, 'verdict': "CORRECT", 'reason': "High relevance found."}
+            return {**state,'good_docs': good, 'verdict': "CORRECT", 'reason': "High relevance found."}
     
         if all(s < LOWER_TH for s in scores):
-            return {'good_docs': [], 'verdict': 'INCORRECT', 'reason': "All chunks irrelevant."}
+            return {**state,'good_docs': [], 'verdict': 'INCORRECT', 'reason': "All chunks irrelevant."}
     
-        return {'good_docs': good, 'verdict': 'AMBIGUOUS', 'reason': "Partial relevance found."}
+        return {**state,'good_docs': good, 'verdict': 'AMBIGUOUS', 'reason': "Partial relevance found."}
     
     
     def decomepose_sentences(self,text:str)->List[str]:
@@ -771,6 +772,7 @@ class MultiRag:
                     kept_docs.append(new_doc)
 
         return {
+            **state,
             'strips': all_strips,
             'keep_strips': kept_sentences,
             'refined_context_docs': kept_docs 
@@ -805,6 +807,7 @@ class MultiRag:
         update_query=output.get('query','')
     
         return{
+        **state,
         'web_query':update_query
         }
     
@@ -828,7 +831,8 @@ class MultiRag:
             ))
     
         print(f"--- WEB SEARCH COMPLETED: {len(web_docs)} RESULTS ---")
-        return {'web_docs': web_docs}
+        return {**state,
+                'web_docs': web_docs}
     def generate(self,state: State) -> State:
         """
         Refined generate function that handles multimodal context sorting 
@@ -874,6 +878,7 @@ class MultiRag:
         response = chain.invoke({})
         
         return {
+            **state,
             "answer": response.content,
             'messages':[AIMessage(content=response.content)]
         }
