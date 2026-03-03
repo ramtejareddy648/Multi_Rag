@@ -175,14 +175,26 @@ def load_messages(thread_id: str):
 async def upload(files: list[UploadFile] = File(...)):
 
     os.makedirs("uploads_doc", exist_ok=True)
+    
+    image_extensions = {".jpg", ".jpeg", ".png", ".webp"}
+    doc_paths = []
+    img_paths = []
+    
 
-    paths = []
+   
 
     for f in files:
         path = f"uploads_doc/{f.filename}"
         with open(path, "wb") as buffer:
             buffer.write(await f.read())
-        paths.append(path)
+        
+        file_ext = os.path.splitext(f.filename)[1].lower()
+        if file_ext in image_extensions:
+            img_paths.append(path)
+        else:
+            doc_paths.append(path)
+        
+        
 
     workflow = get_workflow()
     
@@ -191,7 +203,8 @@ async def upload(files: list[UploadFile] = File(...)):
     rag = workflow._rag
 
     rag.build_enhanced_vector_database(
-        file_paths=paths
+        image_paths=img_paths,
+        file_paths=doc_paths
     )
 
     return {"success": True, "message": "Files indexed"}
