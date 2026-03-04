@@ -242,6 +242,9 @@ async def speech_to_text_api(file: UploadFile = File(...)):
         files=files,
         data=data
     )
+    
+    print(f"📤 Sarvam status: {response.status_code}")
+    print(f"📤 Sarvam response: {response.text}")
 
     if response.status_code != 200:
         return {"error": response.text}
