@@ -224,9 +224,8 @@ async def speech_to_text_api(file: UploadFile = File(...)):
     url = "https://api.sarvam.ai/speech-to-text"
 
     files = {
-    "file": ("audio.webm", audio_bytes, "audio/webm")  # ← changed
+    "file": ("audio.wav", audio_bytes, "audio/wav")
     }
-
     headers = {
         "api-subscription-key": SARVAM_API_KEY
     }
@@ -234,7 +233,7 @@ async def speech_to_text_api(file: UploadFile = File(...)):
     data = {
         "model": "saaras:v3",
         "mode": "transcribe",
-        # "language_code": "te-IN"
+        "language_code": "te-IN"
     }
 
     response = requests.post(
