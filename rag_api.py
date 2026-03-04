@@ -233,8 +233,8 @@ async def speech_to_text_api(file: UploadFile = File(...)):
 
     data = {
         "model": "saaras:v3",
-        "mode": "translate",
-        "language_code": "te-IN"
+        "mode": "transcribe",
+        # "language_code": "te-IN"
     }
 
     response = requests.post(
