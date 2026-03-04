@@ -207,8 +207,7 @@ async def upload(files: list[UploadFile] = File(...)):
         file_paths=doc_paths
     )
 
-    return {"success": True, "message": "Files indexed"}
-
+    return {"success": True, "message": f"Processed {len(doc_paths)} docs and {len(img_paths)} images"}
 
 
 
@@ -225,7 +224,7 @@ async def speech_to_text_api(file: UploadFile = File(...)):
     url = "https://api.sarvam.ai/speech-to-text"
 
     files = {
-        "file": ("audio.wav", audio_bytes, "audio/wav")
+    "file": ("audio.webm", audio_bytes, "audio/webm")  # ← changed
     }
 
     headers = {
